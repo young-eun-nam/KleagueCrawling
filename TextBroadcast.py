@@ -93,7 +93,7 @@ def setBasicInfo(league_num, league_str):
 
 def saveAsCSV(result, league_str):
     c = 0
-    with open('TextBroadcast_'+ league_str +'.csv', "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
+    with open('TextBroadcast_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(EVENTDATAFRAME)
         for val in result:
