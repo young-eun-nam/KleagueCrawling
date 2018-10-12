@@ -15,9 +15,8 @@ ACLDIVCLASS = "clearfix team-score"
 
 # 기타 변수
 MONTH = 12
-TEAMNUMBERS = 2
-STATDATAFRAME = ['Match_ID', 'Team', '점유율', '슈팅', '유효슈팅', '파울', '경고', '퇴장', '코너킥', '프리킥', '오프사이드']
-STATCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
+EVENTDATAFRAME = ['Match_ID', 'Minute', 'Event', 'Team', 'Back_Number', 'Name']
+EVENTCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 
 def buttonList(soup, league_str):
     if league_str in ["K1", "K2", "R"]:
@@ -28,31 +27,30 @@ def buttonList(soup, league_str):
         print("None")
     return match_list
 
-def getData(match_id, name_home_team, name_away_team, score_statistics):
-    statistics_list = []
-    for i in range(TEAMNUMBERS):
+def getData(match_id, name_home_team, name_away_team, min, context):
+    game_data_list = []
+    for i in range(len(min), -1, -1):
         try:
-            raw_data = []
-            raw_data.append(match_id)                           # 1. Match_ID
-            if i == 0:
-                raw_data.append(name_home_team)                 # 2. Team
+            row_data = []
+            row_data.append(match_id)                                                                           # 1. Match_ID
+            row_data.append(min[i].get_text().split("'")[0])                                                    # 2. Minute
+            if (name_home_team in context[i].get_text()):
+                row_data.append(context[i].get_text().split(name_home_team)[0])                                 # 3. Event
+                row_data.append(name_home_team)                                                                 # 4. Team
+                row_data.append(context[i].get_text().split(name_home_team)[1].split(", ")[0].split(" ")[2])    # 5. Back_Number
+                row_data.append(context[i].get_text().split(name_home_team)[1].split(", ")[1].split(" ")[0])    # 6. Name
+            elif (name_away_team in context[i].get_text()):
+                row_data.append(context[i].get_text().split(name_away_team)[0])                                 # 3. Event
+                row_data.append(name_away_team)                                                                 # 4. Team
+                row_data.append(context[i].get_text().split(name_away_team)[1].split(", ")[0].split(" ")[2])    # 5. Back_Number
+                row_data.append(context[i].get_text().split(name_away_team)[1].split(", ")[1].split(" ")[0])    # 6. Name
             else:
-                raw_data.append(name_away_team)                 # 2. Team
-            for j in range(i, len(score_statistics), 2):
-                each_data = []
-                text_score_statistics = score_statistics[j].get_text().split(' ')
-                # 특정 통계 지표에 공백이 존재하므로 체크: text_score_statistics[0]의 값이 존재할 경우에 each_data list에 추가
-                if text_score_statistics[0]:
-                    each_data.append(text_score_statistics[0])  # 3~9. 경기 통계
-                else:
-                    each_data.append(text_score_statistics[1])  # 3~9. 경기 통계
-                raw_data.extend(each_data)
-            statistics_list.append(raw_data)
+                row_data.append(context[i].get_text().split(" ")[0])                                            # 3. Event
+            game_data_list.append(row_data)
+        except:
+            pass
 
-        except Exception as e:
-            print(e)
-
-    return statistics_list
+    return game_data_list
 
 def setBasicInfo(league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
@@ -80,9 +78,11 @@ def setBasicInfo(league_num, league_str):
                 match_id = gs_idxList[j][0]
                 name_home_team = body.findAll('div', class_="team-1")[0].get_text()
                 name_away_team = body.findAll('div', class_="team-2")[0].get_text()
-                score_statistics = body.find('div', class_="compare-data").findAll('div', class_='score')
-                statistics_list = getData(match_id, name_home_team, name_away_team, score_statistics)
-                data_list.extend(statistics_list)
+                min = body.findAll('div', class_="min")
+                context = body.findAll('div', class_="context")
+
+                game_data_list = getData(match_id, name_home_team, name_away_team, min, context)
+                data_list.extend(game_data_list)
 
             except Exception as e:
                 print(e)
@@ -93,9 +93,9 @@ def setBasicInfo(league_num, league_str):
 
 def saveAsCSV(result, league_str):
     c = 0
-    with open('Statistics_'+ league_str +'.csv', "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
+    with open('TextBroadcast_'+ league_str +'.csv', "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
-        writer.writerow(STATDATAFRAME)
+        writer.writerow(EVENTDATAFRAME)
         for val in result:
             try:
                 writer.writerow(val)
@@ -103,16 +103,16 @@ def saveAsCSV(result, league_str):
                 print(c)
             c += 1
 
-def crawlStatistics():
+def crawlTextBroadcast():
     while(True):
-        league_num = input(STATCONSOLEGUIDE)
+        league_num = input(EVENTCONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
         else:
-            print(STATCONSOLEGUIDE)
+            print(EVENTCONSOLEGUIDE)
             continue
         result = setBasicInfo(league_num, league_str)
         saveAsCSV(result, league_str)
 
 if __name__ == "__main__":
-    crawlStatistics()
+    crawlTextBroadcast()
