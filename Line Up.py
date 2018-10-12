@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup as bs
 import pandas as pd
 from tqdm import *
 import csv
+import datetime
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
