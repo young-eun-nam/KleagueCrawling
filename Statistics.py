@@ -1,7 +1,7 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from tqdm import *
-import csv
+import helper.crawlerCommon as crawlerCommon
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
@@ -16,17 +16,9 @@ ACLDIVCLASS = "clearfix team-score"
 # 기타 변수
 MONTH = 12
 TEAMNUMBERS = 2
-STATDATAFRAME = ['Match_ID', 'Team', '점유율', '슈팅', '유효슈팅', '파울', '경고', '퇴장', '코너킥', '프리킥', '오프사이드']
+DATAFRAME = ['Match_ID', 'Team', '점유율', '슈팅', '유효슈팅', '파울', '경고', '퇴장', '코너킥', '프리킥', '오프사이드']
 STATCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 
-def getButtonList(soup, league_str):
-    if league_str in ["K1", "K2", "R"]:
-        match_list = soup.findAll('button', class_=BUTTONCLASS)
-    elif league_str == "ACL":
-        match_list = soup.findAll('div', class_=ACLDIVCLASS)
-    else:
-        print("None")
-    return match_list
 
 def getData(match_id, name_home_team, name_away_team, score_statistics):
     statistics_list = []
@@ -54,6 +46,7 @@ def getData(match_id, name_home_team, name_away_team, score_statistics):
 
     return statistics_list
 
+
 def setBasicInfo(league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
     result = []
@@ -61,7 +54,7 @@ def setBasicInfo(league_num, league_str):
         url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = getButtonList(soup, league_str)
+        match_list = crawlerCommon.getButtonList(soup, league_str, BUTTONCLASS, ACLDIVCLASS)
         match_number = len(match_list)
 
         # html source에서 각 경기의 고유 번호인 gs_idx를 모두 읽어와 gs_idxList에 저장
@@ -91,20 +84,9 @@ def setBasicInfo(league_num, league_str):
 
     return result
 
-def saveAsCSV(result, league_str):
-    c = 0
-    with open('Statistics_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
-        writer = csv.writer(output, lineterminator='\n')
-        writer.writerow(STATDATAFRAME)
-        for val in result:
-            try:
-                writer.writerow(val)
-            except:
-                print(c)
-            c += 1
 
 def crawlStatistics():
-    while(True):
+    while True:
         league_num = input(STATCONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
@@ -112,7 +94,8 @@ def crawlStatistics():
             print(STATCONSOLEGUIDE)
             continue
         result = setBasicInfo(league_num, league_str)
-        saveAsCSV(result, league_str)
+        crawlerCommon.saveAsCSV(result, league_str, DATAFRAME)
+
 
 if __name__ == "__main__":
     crawlStatistics()
