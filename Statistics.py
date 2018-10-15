@@ -9,15 +9,12 @@ MATCHCENTERURL = "http://www.kleague.com/match?vw=record&gs_idx="
 SELECTLEAGUE = "&select_league="
 SELECTLEAGUEYEAR = "&select_league_year=2018"
 
-# CLASS 명
-BUTTONCLASS = "btn btn-outline-blue btn_matchcenter"
-ACLDIVCLASS = "clearfix team-score"
-
 # 기타 변수
 MONTH = 12
 TEAMNUMBERS = 2
 DATAFRAME = ['Match_ID', 'Team', '점유율', '슈팅', '유효슈팅', '파울', '경고', '퇴장', '코너킥', '프리킥', '오프사이드']
 STATCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
+FILENAME = "Statistics"
 
 
 def getData(match_id, name_home_team, name_away_team, score_statistics):
@@ -54,7 +51,7 @@ def setBasicInfo(league_num, league_str):
         url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = crawlerCommon.getButtonList(soup, league_str, BUTTONCLASS, ACLDIVCLASS)
+        match_list = crawlerCommon.getButtonList(soup, league_str)
         match_number = len(match_list)
 
         # html source에서 각 경기의 고유 번호인 gs_idx를 모두 읽어와 gs_idxList에 저장
@@ -84,7 +81,6 @@ def setBasicInfo(league_num, league_str):
 
     return result
 
-
 def crawlStatistics():
     while True:
         league_num = input(STATCONSOLEGUIDE)
@@ -94,7 +90,7 @@ def crawlStatistics():
             print(STATCONSOLEGUIDE)
             continue
         result = setBasicInfo(league_num, league_str)
-        crawlerCommon.saveAsCSV(result, league_str, DATAFRAME)
+        crawlerCommon.saveAsCsv(result, league_str, DATAFRAME, FILENAME)
 
 
 if __name__ == "__main__":

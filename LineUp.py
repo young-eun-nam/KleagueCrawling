@@ -1,7 +1,7 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from tqdm import *
-import csv
+import helper.crawlerCommon as crawlerCommon
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
@@ -10,32 +10,20 @@ SELECTLEAGUE = "&select_league="
 SELECTLEAGUEYEAR = "&select_league_year=2018"
 
 # CLASS 명
-BUTTONCLASS = "btn btn-outline-blue btn_matchcenter"
-ACLDIVCLASS = "clearfix team-score"
 HOMELINEUP = "homeLineUp"
 AWAYLINEUP = "awayLineUp"
 
 # 기타 변수
 MONTH = 12
-LINEUPDATAFRAME = ['Match_ID', 'Team', 'Back_Number', 'Name', 'Position', 'Stating/Bench']
+DATAFRAME = ['Match_ID', 'Team', 'Back_Number', 'Name', 'Position', 'Stating/Bench']
 LINEUPCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 POSITIONNAME = ["GK", "DF", "MF", "FW", "BENCH"]
 STARTINGBENCH = ["선발", "후보"]
+FILENAME = "LineUp"
 
-
-def getButtonList(soup, league_str):
-    if league_str in ["K1", "K2", "R"]:
-        match_list = soup.findAll('button', class_=BUTTONCLASS)
-    elif league_str == "ACL":
-        match_list = soup.findAll('div', class_=ACLDIVCLASS)
-    else:
-        print("None")
-    return match_list
-
-
-def getLineUp(match_id, line_data, name_team, LINEUP, position_list):
+def getLineUp(match_id, line_data, name_team, lineup, position_list):
     for n in range(len(position_list)):
-        player_list = position_list[n].findAll('div', class_=LINEUP)
+        player_list = position_list[n].findAll('div', class_=lineup)
         for i in range(len(player_list)):
             raw_data = []
             is_name_exist = player_list[i].findAll("span", class_="name")
@@ -68,7 +56,7 @@ def setBasicInfo(league_num, league_str):
         html = urlopen(url).read()  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(html, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = getButtonList(soup, league_str)
+        match_list = crawlerCommon.getButtonList(soup, league_str)
         match_number = len(match_list)
 
         # html source에서 각 경기의 고유 번호인 gs_idx를 모두 읽어와 gs_idxList에 저장
@@ -83,8 +71,8 @@ def setBasicInfo(league_num, league_str):
         for j in tqdm(range(match_number)):  # 한번에 크롤링할 페이지 수를 설정해줄 수 있음
             try:
                 html = urlopen(MATCHCENTERURL + str(gs_idxList[j][0])).read()  # 각 매치센터 페이지 사이 url 입력
-                body = bs(html, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
-                match_id = gs_idxList[j][0] # 각 경기의 고유 번호인 gs_idx를 match_id로 정하여 primary key로 활용
+                body = bs(html, 'lxml').body    # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
+                match_id = gs_idxList[j][0]     # 각 경기의 고유 번호인 gs_idx를 match_id로 정하여 primary key로 활용
 
                 name_home_team = body.findAll('div', class_="team-1")[0].get_text()
                 name_away_team = body.findAll('div', class_="team-2")[0].get_text()
@@ -109,22 +97,8 @@ def setBasicInfo(league_num, league_str):
 
     return result
 
-def saveAsCsv(result, league_str):
-    c = 0
-    bad = []
-    with open('Lineup_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
-        writer = csv.writer(output, lineterminator='\n')
-        writer.writerow(LINEUPDATAFRAME)
-        for val in result:
-            try:
-                writer.writerow(val)
-            except:
-                print(c)
-                bad.append(c)
-            c += 1
-
 def crawlLineUp():
-    while(True):
+    while True:
         league_num = input(LINEUPCONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
@@ -132,7 +106,7 @@ def crawlLineUp():
             print(LINEUPCONSOLEGUIDE)
             continue
         result = setBasicInfo(league_num, league_str)
-        saveAsCsv(result, league_str)
+        crawlerCommon.saveAsCsv(result, league_str, DATAFRAME, FILENAME)
 
 if __name__ == "__main__":
     crawlLineUp()
