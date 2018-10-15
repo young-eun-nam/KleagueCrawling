@@ -1,8 +1,9 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from tqdm import *
-import csv
 import datetime
+import helper.crawlerCommon as crawlerCommon
+
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
@@ -20,17 +21,7 @@ CONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2 98:R, 99:ACL):  "
 DATAFRAME = ['Match_ID', 'League', 'Round', 'Date', 'Time', 'Stadium', 'Home_Team', 'Home_Score', 'Away_Score', 'Away_Team']
 
 
-def getButtonList(soup, league_str):
-    if league_str in ["K1", "K2", "R"]:
-        match_list = soup.findAll('button', class_=BUTTONCLASS)
-    elif league_str == "ACL":
-        match_list = soup.findAll('div', class_=ACLDIVCLASS)
-    else:
-        print("None")
-    return match_list
-
-
-def getValue(soup, league_str, match_list, number_match, data):
+def getData(soup, league_str, match_list, number_match, data):
     if league_str in ["K1", "K2", "R"]:
 
         gs_idxList = []
@@ -46,10 +37,10 @@ def getValue(soup, league_str, match_list, number_match, data):
                 html = urlopen(MATCHCENTERURL + str(gs_idxList[j][0])).read()  # 각 매치센터 페이지 사이 url 입력
                 body = bs(html, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
                 match_id = gs_idxList[j][0]
-                D = body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(" (")[0]  # 경기날짜
-                H = int(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(")  ")[1].split(":")[0])  # 시
-                m = int(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(")  ")[1].split(":")[1])  # 분
-                Time = datetime.time(H, m)  # 경기 시간
+                date = body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(" (")[0]  # 경기날짜 YYYY-MM-DD
+                hour = int(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(")  ")[1].split(":")[0])  # 시
+                minute = int(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[0].split(")  ")[1].split(":")[1])  # 분
+                time = datetime.time(hour, minute)  # 경기 시간
 
                 row_data.append(match_id)                                                                               # 1. Match_ID
                 row_data.append(league_str)                                                                             # 2. League
@@ -59,8 +50,8 @@ def getValue(soup, league_str, match_list, number_match, data):
                     row_data.append(" ")                                                                                # 3. Round
                 else:
                     print("None")
-                row_data.append(D)                                                                                      # 4. Date YYYY-MM-DD
-                row_data.append(Time.isoformat())                                                                       # 5. Time HH-mm-SS
+                row_data.append(date)                                                                                   # 4. Date YYYY-MM-DD
+                row_data.append(time.isoformat())                                                                       # 5. Time HH-mm-SS
                 row_data.append(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[2].split("\r")[0])  # 6. Stadium
                 row_data.append(body.findAll('div', class_="team-1")[0].get_text())                                     # 7. Home_Team
                 row_data.append(body.findAll('div', class_="score")[0].get_text().split("\n")[0].split(" : ")[0])       # 8. Home_Score
@@ -68,8 +59,8 @@ def getValue(soup, league_str, match_list, number_match, data):
                 row_data.append(body.findAll('div', class_="team-2")[0].get_text())                                     # 10. Away_Team
                 data.append(row_data)
 
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
         return data
 
@@ -94,8 +85,8 @@ def getValue(soup, league_str, match_list, number_match, data):
                 row_data.append(soup.findAll("div", class_="score")[i].get_text().split("\n")[0].split(":")[1])         # 9. Away_Score
                 row_data.append(soup.findAll("div", class_="team-2")[i].get_text().split("\n")[2])                      # 10. Away_Team
                 data.append(row_data)
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
         return data
 
@@ -103,39 +94,24 @@ def getValue(soup, league_str, match_list, number_match, data):
         print("None")
 
 
-def crawler(league_num, league_str):
+def setBasicInfo(league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
     result = []
     for n in range(MONTH):
         url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = getButtonList(soup, league_str)
+        match_list = crawlerCommon.getButtonList(soup, league_str, BUTTONCLASS, ACLDIVCLASS)
         number_match = len(match_list)
 
         data = []
-        data = getValue(soup, league_str, match_list, number_match, data)
+        data = getData(soup, league_str, match_list, number_match, data)
         result = result + data
     return result
 
 
-def saveAsCsv(result, league_str):
-    c = 0
-    bad = []
-    with open(league_str + '.csv', "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
-        writer = csv.writer(output, lineterminator='\n')
-        writer.writerow(DATAFRAME)
-        for val in result:
-            try:
-                writer.writerow(val)
-            except:
-                print(c)
-                bad.append(c)
-            c += 1
-
-
-def main():
-    while(True):
+def crawlMatchCenter():
+    while True:
         league_num = input(CONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
@@ -146,8 +122,9 @@ def main():
         else:
             print(CONSOLEGUIDE)
             continue
-        result = crawler(league_num, league_str)
-        saveAsCsv(result, league_str)
+        result = setBasicInfo(league_num, league_str)
+        crawlerCommon.saveAsCsv(result, league_str, DATAFRAME)
+
 
 if __name__ == "__main__":
-    main()
+    crawlMatchCenter()
