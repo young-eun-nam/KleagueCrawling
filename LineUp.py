@@ -111,7 +111,6 @@ def setBasicInfo(league_num, league_str):
 
 def saveAsCsv(result, league_str):
     c = 0
-    bad = []
     with open('Lineup_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(LINEUPDATAFRAME)
@@ -120,7 +119,6 @@ def saveAsCsv(result, league_str):
                 writer.writerow(val)
             except:
                 print(c)
-                bad.append(c)
             c += 1
 
 def crawlLineUp():
