@@ -1,7 +1,7 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup as bs
 from tqdm import *
-import csv
+import helper.crawlerCommon as crawlerCommon
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
@@ -15,7 +15,7 @@ ACLDIVCLASS = "clearfix team-score"
 
 # 기타 변수
 MONTH = 12
-EVENTDATAFRAME = ['Match_ID', 'Minute', 'Event', 'Team', 'Back_Number', 'Name']
+DATAFRAME = ['Match_ID', 'Minute', 'Event', 'Team', 'Back_Number', 'Name']
 EVENTCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 
 def getButtonList(soup, league_str):
@@ -34,12 +34,12 @@ def getData(match_id, name_home_team, name_away_team, min, context):
             row_data = []
             row_data.append(match_id)                                                                           # 1. Match_ID
             row_data.append(min[i].get_text().split("'")[0])                                                    # 2. Minute
-            if (name_home_team in context[i].get_text()):
+            if name_home_team in context[i].get_text():
                 row_data.append(context[i].get_text().split(name_home_team)[0])                                 # 3. Event
                 row_data.append(name_home_team)                                                                 # 4. Team
                 row_data.append(context[i].get_text().split(name_home_team)[1].split(", ")[0].split(" ")[2])    # 5. Back_Number
                 row_data.append(context[i].get_text().split(name_home_team)[1].split(", ")[1].split(" ")[0])    # 6. Name
-            elif (name_away_team in context[i].get_text()):
+            elif name_away_team in context[i].get_text():
                 row_data.append(context[i].get_text().split(name_away_team)[0])                                 # 3. Event
                 row_data.append(name_away_team)                                                                 # 4. Team
                 row_data.append(context[i].get_text().split(name_away_team)[1].split(", ")[0].split(" ")[2])    # 5. Back_Number
@@ -47,8 +47,8 @@ def getData(match_id, name_home_team, name_away_team, min, context):
             else:
                 row_data.append(context[i].get_text().split(" ")[0])                                            # 3. Event
             game_data_list.append(row_data)
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
     return game_data_list
 
@@ -91,20 +91,9 @@ def setBasicInfo(league_num, league_str):
 
     return result
 
-def saveAsCSV(result, league_str):
-    c = 0
-    with open('TextBroadcast_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
-        writer = csv.writer(output, lineterminator='\n')
-        writer.writerow(EVENTDATAFRAME)
-        for val in result:
-            try:
-                writer.writerow(val)
-            except:
-                print(c)
-            c += 1
 
 def crawlTextBroadcast():
-    while(True):
+    while True:
         league_num = input(EVENTCONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
@@ -112,7 +101,7 @@ def crawlTextBroadcast():
             print(EVENTCONSOLEGUIDE)
             continue
         result = setBasicInfo(league_num, league_str)
-        saveAsCSV(result, league_str)
+        crawlerCommon.saveAsCSV(result, league_str, DATAFRAME)
 
 if __name__ == "__main__":
     crawlTextBroadcast()

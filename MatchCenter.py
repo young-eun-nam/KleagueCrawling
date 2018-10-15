@@ -68,8 +68,8 @@ def getValue(soup, league_str, match_list, number_match, data):
                 row_data.append(body.findAll('div', class_="team-2")[0].get_text())                                     # 10. Away_Team
                 data.append(row_data)
 
-            except Exception as e:
-                print(e)
+            except:
+                pass
 
         return data
 
@@ -94,8 +94,8 @@ def getValue(soup, league_str, match_list, number_match, data):
                 row_data.append(soup.findAll("div", class_="score")[i].get_text().split("\n")[0].split(":")[1])         # 9. Away_Score
                 row_data.append(soup.findAll("div", class_="team-2")[i].get_text().split("\n")[2])                      # 10. Away_Team
                 data.append(row_data)
-            except Exception as e:
-                print(e)
+            except:
+                pass
 
         return data
 
@@ -121,6 +121,7 @@ def crawler(league_num, league_str):
 
 def saveAsCsv(result, league_str):
     c = 0
+    bad = []
     with open(league_str + '.csv', "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(DATAFRAME)
@@ -129,6 +130,7 @@ def saveAsCsv(result, league_str):
                 writer.writerow(val)
             except:
                 print(c)
+                bad.append(c)
             c += 1
 
 
