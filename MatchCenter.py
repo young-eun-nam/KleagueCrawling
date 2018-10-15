@@ -20,7 +20,7 @@ CONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2 98:R, 99:ACL):  "
 DATAFRAME = ['Match_ID', 'League', 'Round', 'Date', 'Time', 'Stadium', 'Home_Team', 'Home_Score', 'Away_Score', 'Away_Team']
 
 
-def buttonList(soup, league_str):
+def getButtonList(soup, league_str):
     if league_str in ["K1", "K2", "R"]:
         match_list = soup.findAll('button', class_=BUTTONCLASS)
     elif league_str == "ACL":
@@ -110,7 +110,7 @@ def crawler(league_num, league_str):
         url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = buttonList(soup, league_str)
+        match_list = getButtonList(soup, league_str)
         number_match = len(match_list)
 
         data = []
