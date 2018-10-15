@@ -14,7 +14,7 @@ def getButtonList(soup, league_str):
     return match_list
 
 def saveAsCsv(result, league_str, dataframe, filename):
-    with open(filename + '_{}.csv'.format(league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
+    with open('{}_{}.csv'.format(filename, league_str), "w") as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(dataframe)
         for index, val in enumerate(result):
