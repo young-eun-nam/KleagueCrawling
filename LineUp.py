@@ -18,7 +18,7 @@ MONTH = 12
 DATAFRAME = ['Match_ID', 'Team', 'Back_Number', 'Name', 'Position', 'Stating/Bench']
 LINEUPCONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 POSITIONNAME = ["GK", "DF", "MF", "FW", "BENCH"]
-STARTINGBENCH = ["선발", "후보"]
+STARTINGBENCH = ["선발", "대기"]
 FILENAME = "LineUp"
 
 def getLineUp(match_id, line_data, name_team, lineup, position_list):
