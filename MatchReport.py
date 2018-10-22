@@ -34,12 +34,12 @@ def getData(soup, league_num, league_str, match_list, number_match, data):
             try:
                 row_data = []
                 match_id = gs_idxList[j][0]
-                html = urlopen(MATCHCENTERURL + str(match_id)).read()   # 각 매치센터 페이지 사이 url 입력
+                html = urlopen(MATCHCENTERURL + match_id).read()   # 각 매치센터 페이지 사이 url 입력
                 body = bs(html, 'lxml').body    # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
                 if league_num == "1":
-                    report_html = urlopen(REPORTURL + IPTYEAR + IPTGAMEID + str(match_id) + IPTSEQ + league_num).read()  # 데이터 보고서 페이지 url
+                    report_html = urlopen(REPORTURL + IPTYEAR + IPTGAMEID + match_id + IPTSEQ + league_num).read()  # 데이터 보고서 페이지 url
                 elif league_num == "2":
-                    report_html = urlopen(REPORTURL + IPTYEAR + IPTGAMEID + str(match_id-198) + IPTSEQ + league_num).read()  # 데이터 보고서 페이지 url
+                    report_html = urlopen(REPORTURL + IPTYEAR + IPTGAMEID + str(int(match_id)-198) + IPTSEQ + league_num).read()  # 데이터 보고서 페이지 url
                 else:
                     pass
                 report = bs(report_html, 'lxml').body   # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
