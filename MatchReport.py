@@ -16,7 +16,7 @@ IPTSEQ = "&iptMeetSeq="
 
 # 기타 변수
 MONTH = 12
-CONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2 98:R, 99:ACL):  "
+CONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2):  "
 DATAFRAME = ['Match_ID', 'League', 'Round', 'Date', 'Time', 'First_Half_Start_Time', 'First_Half_End_Time', 'Half_Time', 'Second_Half_Start_Time', 'Second_Half_End_Time', 'Stadium', 'Home_Team', 'Home_Score', 'Away_Score', 'Away_Team']
 FILENAME = "MatchReport"
 
