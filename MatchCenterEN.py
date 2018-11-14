@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup as bs
 from tqdm import *
 import datetime
@@ -14,7 +14,7 @@ SELECTLEAGUEYEAR = "&select_league_year=2018"
 MONTH = 12
 CONSOLEGUIDE = "Input league number(league_num 1:K1, 2:K2 98:R, 99:ACL):  "
 DATAFRAME = ['Match_ID', 'League', 'Round', 'Date', 'Time', 'Stadium', 'Home_Team', 'Home_Score', 'Away_Score', 'Away_Team']
-FILENAME = "MatchCenter"
+FILENAME = "MatchCenterEN"
 
 def getData(soup, league_str, match_list, number_match, data):
     if league_str in ["K1", "K2", "R"]:
@@ -48,10 +48,10 @@ def getData(soup, league_str, match_list, number_match, data):
                 row_data.append(date)                                                                                   # 4. Date YYYY-MM-DD
                 row_data.append(time.isoformat())                                                                       # 5. Time HH-mm-SS
                 row_data.append(body.findAll('div', class_="match-info")[0].get_text().split(" / ")[2].split("\r")[0])  # 6. Stadium
-                row_data.append(body.findAll('div', class_="team-1")[0].get_text())                                     # 7. Home_Team
+                row_data.append(soup.findAll('div', class_="team-1")[j].get_text().split("\n")[1])                      # 7. Home_Team
                 row_data.append(body.findAll('div', class_="score")[0].get_text().split("\n")[0].split(" : ")[0])       # 8. Home_Score
                 row_data.append(body.findAll('div', class_="score")[0].get_text().split("\n")[0].split(" : ")[1])       # 9. Away_Score
-                row_data.append(body.findAll('div', class_="team-2")[0].get_text())                                     # 10. Away_Team
+                row_data.append(soup.findAll('div', class_="team-2")[j].get_text().split("\n")[2])                      # 10. Away_Team
                 data.append(row_data)
 
             except Exception as e:
@@ -92,9 +92,10 @@ def setBasicInfo(league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
     result = []
     for n in range(MONTH):
-        url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
+        ajax_url = URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR
+        request = Request(ajax_url, headers = {'Cookie':'vLang=en'})
+        url = urlopen(request).read().decode('utf-8')  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
-
         match_list = crawlerCommon.getButtonList(soup, league_str)
         number_match = len(match_list)
 
@@ -103,7 +104,7 @@ def setBasicInfo(league_num, league_str):
         result = result + data
     return result
 
-def crawlMatchCenter():
+def crawlMatchCenterEN():
     while True:
         league_num = input(CONSOLEGUIDE)
         if league_num in ["1", "2"]:
@@ -119,4 +120,4 @@ def crawlMatchCenter():
         crawlerCommon.saveAsCsv(result, league_str, DATAFRAME, FILENAME)
 
 if __name__ == "__main__":
-    crawlMatchCenter()
+    crawlMatchCenterEN()
