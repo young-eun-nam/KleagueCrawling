@@ -93,7 +93,8 @@ def setBasicInfo(league_num, league_str):
     result = []
     for n in range(MONTH):
         ajax_url = URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR
-        request = Request(ajax_url, headers = {'Cookie':'vLang=en'})
+        cookies = {'Cookie': 'vLang=en'}
+        request = Request(ajax_url, headers=cookies)
         url = urlopen(request).read().decode('utf-8')  # 크롤링하고자 하는 사이트 url명을 입력
         soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
         match_list = crawlerCommon.getButtonList(soup, league_str)
