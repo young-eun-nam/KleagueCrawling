@@ -3,12 +3,13 @@ from bs4 import BeautifulSoup as bs
 from tqdm import *
 import datetime
 import helper.crawlerCommon as crawlerCommon
+import sys
 
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
 MATCHCENTERURL = "http://www.kleague.com/match?vw=record&gs_idx="
 SELECTLEAGUE = "&select_league="
-SELECTLEAGUEYEAR = "&select_league_year=2018"
+SELECTLEAGUEYEAR = "&select_league_year="
 
 # 기타 변수
 MONTH = 12
@@ -88,24 +89,25 @@ def getData(soup, league_str, match_list, number_match, data):
     else:
         print("None")
 
-def setBasicInfo(league_num, league_str):
+def setBasicInfo(year, month, league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
     result = []
-    for n in range(MONTH):
-        url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR).read()  # 크롤링하고자 하는 사이트 url명을 입력
-        soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
+    # for n in range(MONTH):
+    n = month - 1
+    url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR + year).read()  # 크롤링하고자 하는 사이트 url명을 입력
+    soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
-        match_list = crawlerCommon.getButtonList(soup, league_str)
-        number_match = len(match_list)
+    match_list = crawlerCommon.getButtonList(soup, league_str)
+    number_match = len(match_list)
 
-        data = []
-        data = getData(soup, league_str, match_list, number_match, data)
-        result = result + data
+    data = []
+    data = getData(soup, league_str, match_list, number_match, data)
+    result = result + data
     return result
 
-def crawlMatchCenter():
+def crawlMatchCenter(year, month, league_num):
     while True:
-        league_num = input(CONSOLEGUIDE)
+        # league_num = input(CONSOLEGUIDE)
         if league_num in ["1", "2"]:
             league_str = "K" + league_num
         elif league_num == "98":
@@ -115,8 +117,9 @@ def crawlMatchCenter():
         else:
             print(CONSOLEGUIDE)
             continue
-        result = setBasicInfo(league_num, league_str)
-        crawlerCommon.saveAsCsv(result, league_str, DATAFRAME, FILENAME)
+
+        result = setBasicInfo(year, month, league_num, league_str)
+        crawlerCommon.saveAsCsv(year, month, result, league_str, DATAFRAME, FILENAME)
 
 if __name__ == "__main__":
-    crawlMatchCenter()
+    crawlMatchCenter(sys.argv[0], sys.argv[1], sys.argv[2])
