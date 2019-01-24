@@ -4,7 +4,6 @@ from tqdm import *
 import datetime
 import helper.crawlerCommon as crawlerCommon
 import sys
-
 # URL 변수
 URL = "http://www.kleague.com/schedule/get_lists?datatype=html&month="
 MATCHCENTERURL = "http://www.kleague.com/match?vw=record&gs_idx="
