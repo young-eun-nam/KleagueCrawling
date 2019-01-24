@@ -27,7 +27,8 @@ def getData(soup, league_str, match_list, number_match, data):
             gs_idxList.append(idxList)
 
         # 공통
-        for j in tqdm(range(number_match)):  # 한번에 크롤링할 페이지 수를 설정해줄 수 있음
+        # for j in tqdm(range(number_match)):  # 한번에 크롤링할 페이지 수를 설정해줄 수 있음
+        for j in range(number_match):  # 한번에 크롤링할 페이지 수를 설정해줄 수 있음
             try:
                 row_data = []
                 html = urlopen(MATCHCENTERURL + str(gs_idxList[j][0])).read()  # 각 매치센터 페이지 사이 url 입력
@@ -41,9 +42,9 @@ def getData(soup, league_str, match_list, number_match, data):
                 row_data.append(match_id)                                                                               # 1. Match_ID
                 row_data.append(league_str)                                                                             # 2. League
                 if league_str in ["K1", "K2"]:
-                    row_data.append(soup.findAll('td', class_="col-rd")[j].get_text().split("R")[0])                    # 3. Round
+                    row_data.append(soup.findAll('td', class_="col-rd")[j].get_text().split("R")[0].strip())            # 3. Round
                 elif league_str == "R":
-                    row_data.append(" ")                                                                                # 3. Round
+                    row_data.append("")                                                                                 # 3. Round
                 else:
                     print("None")
                 row_data.append(date)                                                                                   # 4. Date YYYY-MM-DD
@@ -62,7 +63,8 @@ def getData(soup, league_str, match_list, number_match, data):
 
     elif league_str == "ACL":
 
-        for i in tqdm(range(number_match)):  # 한번에 크롤링할 페이지 수를 설정
+        #for i in tqdm(range(number_match)):  # 한번에 크롤링할 페이지 수를 설정
+        for i in range(number_match):  # 한번에 크롤링할 페이지 수를 설정
             try:
                 date = []
                 for j in range(len(soup.findAll('table', class_="table"))):
@@ -93,7 +95,7 @@ def setBasicInfo(year, month, league_num, league_str):
     # league_num 1:K1, 2:K2 98:R, 99:ACL
     result = []
     # for n in range(MONTH):
-    n = month - 1
+    n = int(month) - 1
     url = urlopen(URL + str(n + 1).zfill(2) + SELECTLEAGUE + league_num + SELECTLEAGUEYEAR + year).read()  # 크롤링하고자 하는 사이트 url명을 입력
     soup = bs(url, 'lxml').body  # beautifulsoup 라이브러리를 통해 html을 전부 읽어오는 작업 수행
 
@@ -106,20 +108,20 @@ def setBasicInfo(year, month, league_num, league_str):
     return result
 
 def crawlMatchCenter(year, month, league_num):
-    while True:
-        # league_num = input(CONSOLEGUIDE)
-        if league_num in ["1", "2"]:
-            league_str = "K" + league_num
-        elif league_num == "98":
-            league_str = "R"
-        elif league_num == "99":
-            league_str = "ACL"
-        else:
-            print(CONSOLEGUIDE)
-            continue
+    #while True:
+    # league_num = input(CONSOLEGUIDE)
+    if league_num in ["1", "2"]:
+        league_str = "K" + league_num
+    elif league_num == "98":
+        league_str = "R"
+    elif league_num == "99":
+        league_str = "ACL"
+    '''else:
+        print(CONSOLEGUIDE)
+        continue'''
 
-        result = setBasicInfo(year, month, league_num, league_str)
-        crawlerCommon.saveAsCsv(year, month, result, league_str, DATAFRAME, FILENAME)
+    result = setBasicInfo(year, month, league_num, league_str)
+    crawlerCommon.saveAsCsv(year, month, result, league_str, DATAFRAME, FILENAME)
 
 if __name__ == "__main__":
-    crawlMatchCenter(sys.argv[0], sys.argv[1], sys.argv[2])
+    crawlMatchCenter(sys.argv[1], sys.argv[2], sys.argv[3])
