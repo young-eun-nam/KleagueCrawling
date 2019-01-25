@@ -69,11 +69,14 @@ def getData(year, game_idx, league_num, league_str, data):
         row_data.append(half_time)                                                                                      # 7. Half_Time
         row_data.append(second_half_start_time)                                                                         # 8. Second_Half_Start_Time
         row_data.append(second_half_end_time)                                                                           # 9. Second_Half_End_Time
-        row_data.append(report.findAll('tr')[2].findAll('td', class_='bar_bottm_right')[0].get_text().split(' / ')[0])  # 10. Stadium
-        row_data.append(report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[8].p.get_text())  # 11. Home_Team
+        stadium = report.findAll('tr')[2].findAll('td', class_='bar_bottm_right')[0].get_text().split(' / ')[0]
+        row_data.append(stadium)  # 10. Stadium
+        hometeam = report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[8].p.get_text()
+        row_data.append(hometeam)  # 11. Home_Team
         row_data.append(report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[10].get_text())   # 12. Home_Score
         row_data.append(report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[16].get_text())   # 13. Away_Score
-        row_data.append(report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[17].p.get_text()) # 14. Away_Team
+        awayteam = report.find('table', class_='height110 border01 mb20').findAll('tr')[0].findAll('td')[17].p.get_text()
+        row_data.append(awayteam) # 14. Away_Team
         data.append(row_data)
 
     except Exception as e:
