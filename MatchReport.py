@@ -97,9 +97,8 @@ def crawlMatchCenter(year, game_idx, league_num):
         #league_num = input(CONSOLEGUIDE)
     if league_num in ["1", "2"]:
         league_str = "K" + league_num
-        '''else:
-            print(CONSOLEGUIDE)
-            continue'''
+    else:
+        league_str = "R"
     game_idx2 = int(game_idx) - 1
     result = setBasicInfo(year, game_idx2, league_num, league_str)
     crawlerCommon.saveAsCsv2(year, str(game_idx), result, league_str, DATAFRAME, FILENAME)

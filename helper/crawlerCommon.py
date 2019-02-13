@@ -14,7 +14,7 @@ def getButtonList(soup, league_str):
     return match_list
 
 def saveAsCsv(year, month, result, league_str, dataframe, filename):
-    with open('{}_{}_{}_{}.csv'.format(filename, league_str, year, month), "w", newline='', encoding='utf-8') as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
+    with open('c:\\dev\\temp\\{}_{}_{}_{}.csv'.format(filename, league_str, year, month), "w", newline='', encoding='utf-8') as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(dataframe)
         for index, val in enumerate(result):
@@ -25,7 +25,7 @@ def saveAsCsv(year, month, result, league_str, dataframe, filename):
                 print(e)
 
 def saveAsCsv2(year, game_idx, result, league_str, dataframe, filename):
-    with open('{}_{}_{}_{}.csv'.format(filename, league_str, year, game_idx), "w", newline='', encoding='utf-8') as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
+    with open('c:\\dev\\temp\\{}_{}_{}_{}.csv'.format(filename, league_str, year, game_idx), "w", newline='', encoding='utf-8') as output:  # 크롤링한 결과물들을 csv파일의 형태로 저장
         writer = csv.writer(output, lineterminator='\n')
         writer.writerow(dataframe)
         for index, val in enumerate(result):
